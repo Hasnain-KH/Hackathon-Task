@@ -1,4 +1,4 @@
-process.env.TZ = process.env.TZ || 'Asia/Karachi';
+process.env.Timezone = process.env.Timezone || 'Asia/Karachi';
 
 import 'dotenv/config';
 import app from './app.js';

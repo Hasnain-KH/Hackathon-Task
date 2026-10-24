@@ -1,6 +1,6 @@
-process.env.TZ = process.env.TZ || 'Asia/Karachi';
+process.env.Timezone = process.env.Timezone || 'Asia/Karachi';
 
-const timeZone = () => process.env.TZ || 'Asia/Karachi';
+const timeZone = () => process.env.Timezone || 'Asia/Karachi';
 
 function dateParts(date, timeZoneName = timeZone()) {
   const parts = new Intl.DateTimeFormat('en-CA', {
