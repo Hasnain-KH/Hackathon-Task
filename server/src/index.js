@@ -1,3 +1,5 @@
+process.env.TZ = process.env.TZ || 'Asia/Karachi';
+
 import 'dotenv/config';
 import app from './app.js';
 import { connectDB } from './config/db.js';

@@ -55,3 +55,7 @@ The organization setup module adds Admin-managed company settings, departments, 
 ## Employee module
 
 HR can register employee records and initial logins, search and filter the directory, edit employee profiles, terminate an employee login, and import/export CSV. Employees can view their own profile and change only their phone and address. Salary components are stored on the employee record; gross is displayed as 1.5 times basic salary. No attendance, leave, or payroll processing is included here.
+
+## Attendance module
+
+Attendance records use server-stamped check-in and check-out times, with local work dates based on `TZ` (defaults to `Asia/Karachi`). Employees can review their calendar and request corrections; HR/Admin can view the daily board and review requests. Camera capture and location enforcement are not included.

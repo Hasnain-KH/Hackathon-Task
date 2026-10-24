@@ -22,6 +22,10 @@ import EmployeeList from './pages/employees/EmployeeList.jsx';
 import EmployeeProfile from './pages/employees/EmployeeProfile.jsx';
 import CSVImport from './pages/employees/CSVImport.jsx';
 import SelfProfile from './pages/employees/SelfProfile.jsx';
+import MyAttendance from './pages/attendance/MyAttendance.jsx';
+import MyCorrections from './pages/attendance/MyCorrections.jsx';
+import AttendanceBoard from './pages/attendance/AttendanceBoard.jsx';
+import CorrectionsInbox from './pages/attendance/CorrectionsInbox.jsx';
 
 function RootRedirect() {
   const { user, loading: authLoading } = useAuth();
@@ -84,17 +88,24 @@ function AppRoutes() {
             <Route path="/admin/payroll" element={<PlaceholderPage title="Payroll — coming later" />} />
           </Route>
         </Route>
+        <Route element={<ProtectedRoute allow={['admin', 'hr']} />}>
+          <Route element={<AppShell />}>
+            <Route path="/admin/attendance" element={<AttendanceBoard />} />
+            <Route path="/admin/attendance/corrections" element={<CorrectionsInbox />} />
+          </Route>
+        </Route>
         <Route element={<ProtectedRoute allow={['hr']} />}>
           <Route element={<AppShell />}>
             <Route path="/hr" element={<HRHome />} />
             {[
               ['employees', <EmployeeList />],
-              ['attendance', 'Attendance — coming later'],
+              ['attendance', <AttendanceBoard />],
               ['leave', 'Leave — coming later'],
               ['payroll', 'Payroll — coming later'],
             ].map(([path, element]) => <Route key={path} path={`/hr/${path}`} element={typeof element === 'string' ? <PlaceholderPage title={element} /> : element} />)}
             <Route path="/hr/employees/:id" element={<EmployeeProfile />} />
             <Route path="/hr/employees/import" element={<CSVImport />} />
+            <Route path="/hr/attendance/corrections" element={<CorrectionsInbox />} />
           </Route>
         </Route>
         <Route element={<ProtectedRoute allow={['employee']} />}>
@@ -102,10 +113,11 @@ function AppRoutes() {
             <Route path="/employee" element={<EmployeeHome />} />
             <Route path="/employee/profile" element={<SelfProfile />} />
             {[
-              ['attendance', 'My attendance — coming later'],
+              ['attendance', <MyAttendance />],
               ['leave', 'My leave — coming later'],
               ['payslips', 'My payslips — coming later'],
-            ].map(([path, title]) => <Route key={path} path={`/employee/${path}`} element={<PlaceholderPage title={title} />} />)}
+            ].map(([path, title]) => <Route key={path} path={`/employee/${path}`} element={typeof title === 'string' ? <PlaceholderPage title={title} /> : title} />)}
+            <Route path="/employee/attendance/corrections" element={<MyCorrections />} />
           </Route>
         </Route>
         <Route path="/dashboard" element={<DashboardRedirect />} />

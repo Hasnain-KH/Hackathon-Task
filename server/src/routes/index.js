@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import authRoutes from './auth.routes.js';
+import attendanceRoutes from './attendance.routes.js';
 import employeeRoutes from './employee.routes.js';
 import orgRoutes from './org.routes.js';
 import setupRoutes from './setup.routes.js';
@@ -15,5 +16,6 @@ router.use('/auth', authRoutes);
 router.use(orgRoutes);
 router.use('/users', usersRoutes);
 router.use('/employees', employeeRoutes);
+router.use('/attendance', attendanceRoutes);
 
 export default router;
