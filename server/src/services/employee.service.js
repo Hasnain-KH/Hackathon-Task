@@ -4,6 +4,7 @@ import Designation from '../models/Designation.js';
 import Employee from '../models/Employee.js';
 import User from '../models/User.js';
 import AppError from '../utils/errors.js';
+import { auditService } from './audit.service.js';
 
 const employeeWritableFields = [
   'firstName', 'lastName', 'email', 'phone', 'address', 'gender', 'dateOfBirth',
@@ -213,7 +214,7 @@ async function validateCsvRows(csvText) {
   return { total: candidates.length, valid, invalid: candidates.length - valid, rows };
 }
 
-async function createEmployeeRecord(payload, actorUserId) {
+async function createEmployeeRecord(payload, actorUserId, req) {
   const department = await Department.findOne({ _id: payload.departmentId, isActive: true });
   const designation = await Designation.findOne({
     _id: payload.designationId,
@@ -249,6 +250,7 @@ async function createEmployeeRecord(payload, actorUserId) {
     });
     employee.userRef = user._id;
     await employee.save();
+    await auditService.log(req, { action: 'CREATE', entity: 'Employee', entityId: employee._id, after: employee });
     return { employee, tempPassword: password };
   } catch (error) {
     if (user) await User.deleteOne({ _id: user._id });
@@ -299,7 +301,7 @@ export const employeeService = {
     return this.getEmployeeById(actor.employeeId, actor);
   },
 
-  async updateEmployee(id, patch, actor) {
+  async updateEmployee(id, patch, actor, req) {
     let employee;
     if (actor.role === 'employee') {
       if (id !== actor.employeeId) throw new AppError(403, 'You may only update your own profile.');
@@ -307,8 +309,10 @@ export const employeeService = {
       if (disallowed.length) throw new AppError(403, 'Employees may only update phone and address.');
       employee = await Employee.findById(id);
       if (!employee) throw new AppError(404, 'Employee not found.');
+      const before = employee.toObject();
       for (const key of ['phone', 'address']) if (Object.hasOwn(patch, key)) employee[key] = patch[key];
       await employee.save();
+      await auditService.log(req, { action: 'UPDATE', entity: 'Employee', entityId: employee._id, before, after: employee });
       return this.getEmployeeById(id, actor);
     }
 
@@ -317,6 +321,7 @@ export const employeeService = {
     }
     employee = await Employee.findById(id);
     if (!employee) throw new AppError(404, 'Employee not found.');
+    const before = employee.toObject();
 
     const sanitizedPatch = pickEmployeeFields(patch);
     if (sanitizedPatch.departmentId || sanitizedPatch.designationId) {
@@ -358,6 +363,7 @@ export const employeeService = {
       if (employee.status === 'terminated' && employee.userRef) {
         await User.findByIdAndUpdate(employee.userRef, { isActive: false });
       }
+      await auditService.log(req, { action: 'UPDATE', entity: 'Employee', entityId: employee._id, before, after: employee });
     } catch (error) {
       if (linkedUserEmailUpdated) await User.findByIdAndUpdate(employee.userRef, { email: previousEmail });
       duplicateError(error);
@@ -365,12 +371,14 @@ export const employeeService = {
     return this.getEmployeeById(id, actor);
   },
 
-  async softDeleteEmployee(id) {
+  async softDeleteEmployee(id, req) {
     const employee = await Employee.findById(id);
     if (!employee) throw new AppError(404, 'Employee not found.');
+    const before = employee.toObject();
     employee.status = 'terminated';
     await employee.save();
     if (employee.userRef) await User.findByIdAndUpdate(employee.userRef, { isActive: false });
+    await auditService.log(req, { action: 'DELETE', entity: 'Employee', entityId: employee._id, before, after: employee });
     return employee;
   },
 
@@ -378,7 +386,7 @@ export const employeeService = {
     return validateCsvRows(csvText);
   },
 
-  async csvCommit(csvText, actorUserId) {
+  async csvCommit(csvText, actorUserId, req) {
     const report = await validateCsvRows(csvText);
     if (report.invalid > 0) {
       const error = new AppError(422, 'CSV contains invalid rows. Review the dry-run report.');
@@ -403,6 +411,10 @@ export const employeeService = {
         await Employee.deleteOne({ _id: record.employeeId });
       }
       throw error;
+    }
+    for (const record of created) {
+      const employee = await Employee.findById(record.employeeId);
+      await auditService.log(req, { action: 'CREATE', entity: 'Employee', entityId: employee?._id, after: employee });
     }
     return { created: created.length, tempPasswords };
   },

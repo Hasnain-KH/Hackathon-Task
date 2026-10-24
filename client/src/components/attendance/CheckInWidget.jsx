@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import api from '../../api/axios.js';
 import Button from '../ui/Button.jsx';
 import ErrorBanner from '../ui/ErrorBanner.jsx';
@@ -6,12 +6,16 @@ import Loader from '../ui/Loader.jsx';
 import StatusBadge from './StatusBadge.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { apiErrorMessage } from '../ui/useApiError.js';
+import { useAuth } from '../../context/AuthContext.jsx';
+
+const CameraCheckInModal = lazy(() => import('./CameraCheckInModal.jsx'));
 
 function localTime(value) {
   return value ? new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—';
 }
 
 export default function CheckInWidget() {
+  const { user } = useAuth();
   const toast = useToast();
   const [today, setToday] = useState(null);
   const [settings, setSettings] = useState(null);
@@ -21,19 +25,31 @@ export default function CheckInWidget() {
   const [location, setLocation] = useState(null);
   const [locationMessage, setLocationMessage] = useState('');
   const [error, setError] = useState('');
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [cameraMessage, setCameraMessage] = useState('');
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     const { data } = await api.get('/attendance/me/today');
     setToday(data.data);
-  };
+  }, []);
+  const refreshAfterCameraCheckIn = useCallback(async () => {
+    try {
+      await refresh();
+    } catch (requestError) {
+      setError(apiErrorMessage(requestError, 'Checked in, but could not refresh today’s attendance.'));
+    }
+  }, [refresh]);
 
   useEffect(() => {
-    Promise.all([api.get('/attendance/me/today'), api.get('/company')])
-      .then(([todayResponse, settingsResponse]) => {
-        setToday(todayResponse.data.data);
-        setSettings(settingsResponse.data.data);
+    Promise.allSettled([api.get('/attendance/me/today'), api.get('/company')])
+      .then(([todayResult, settingsResult]) => {
+        if (todayResult.status === 'fulfilled') {
+          setToday(todayResult.value.data.data);
+        } else {
+          setError(apiErrorMessage(todayResult.reason, 'Could not load today’s attendance.'));
+        }
+        if (settingsResult.status === 'fulfilled') setSettings(settingsResult.value.data.data);
       })
-      .catch((requestError) => setError(apiErrorMessage(requestError, 'Could not load today’s attendance.')))
       .finally(() => setLoading(false));
   }, []);
 
@@ -100,6 +116,7 @@ export default function CheckInWidget() {
         {today?.record && <StatusBadge status={today.record.status} />}
       </div>
       <ErrorBanner>{error}</ErrorBanner>
+      {cameraMessage && <p role="status" className="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">{cameraMessage}</p>}
       {today?.record ? (
         <div className="mt-5 grid gap-4 sm:grid-cols-3">
           <div className="rounded-xl bg-white p-4"><p className="text-xs text-slate-500">Checked in</p><p className="mt-1 font-semibold text-ink">{localTime(today.record.checkInAt)}</p></div>
@@ -113,10 +130,21 @@ export default function CheckInWidget() {
       ) : (
         <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center">
           <Button type="button" disabled={busy} className="min-w-36 py-3 text-base" onClick={checkIn}>{busy ? 'Checking in…' : 'Check In'}</Button>
+          {user?.role === 'employee' && settings?.officeLat !== null && settings?.officeLat !== undefined
+            && settings?.officeLng !== null && settings?.officeLng !== undefined
+            && <Button type="button" variant="secondary" className="py-3" onClick={() => { setCameraMessage(''); setCameraOpen(true); }}>Check in with camera</Button>}
           <label className="flex items-center gap-2 text-sm text-slate-600"><input type="checkbox" checked={locationEnabled} onChange={(event) => setLocationEnabled(event.target.checked)} />Include my location (optional)</label>
           {locationMessage && <span className="text-xs text-slate-500">{locationMessage}</span>}
         </div>
       )}
+      {cameraOpen && <Suspense fallback={<div role="status" className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 text-white">Loading camera check-in…</div>}>
+        <CameraCheckInModal
+          settings={settings}
+          onClose={() => setCameraOpen(false)}
+          onUnavailable={(message) => { setCameraMessage(message); setCameraOpen(false); }}
+          onSuccess={refreshAfterCameraCheckIn}
+        />
+      </Suspense>}
     </section>
   );
 }

@@ -31,7 +31,7 @@ router.patch(
   validate,
   asyncHandler(async (req, res) => {
     const employee = await employeeService.getSelfProfile(actorFor(req.user));
-    const updated = await employeeService.updateEmployee(employee._id.toString(), req.body, actorFor(req.user));
+    const updated = await employeeService.updateEmployee(employee._id.toString(), req.body, actorFor(req.user), req);
     res.json({ data: updated });
   }),
 );
@@ -59,7 +59,7 @@ router.post(
     if (req.body.dryRun) {
       return res.json({ data: await employeeService.csvDryRun(req.body.csv) });
     }
-    return res.status(201).json({ data: await employeeService.csvCommit(req.body.csv, req.user.id) });
+    return res.status(201).json({ data: await employeeService.csvCommit(req.body.csv, req.user.id, req) });
   }),
 );
 
@@ -69,7 +69,7 @@ router.post(
   createEmployee,
   validate,
   asyncHandler(async (req, res) => {
-    const result = await employeeService.createEmployee(req.body, req.user.id);
+    const result = await employeeService.createEmployee(req.body, req.user.id, req);
     res.status(201).json({ employee: result.employee, tempPassword: result.tempPassword });
   }),
 );
@@ -100,7 +100,7 @@ router.patch(
   updateEmployee,
   validate,
   asyncHandler(async (req, res) => {
-    const employee = await employeeService.updateEmployee(req.params.id, req.body, actorFor(req.user));
+    const employee = await employeeService.updateEmployee(req.params.id, req.body, actorFor(req.user), req);
     res.json({ data: employee });
   }),
 );
@@ -111,7 +111,7 @@ router.delete(
   employeeId,
   validate,
   asyncHandler(async (req, res) => {
-    res.json({ data: await employeeService.softDeleteEmployee(req.params.id) });
+    res.json({ data: await employeeService.softDeleteEmployee(req.params.id, req) });
   }),
 );
 

@@ -105,18 +105,20 @@ export default function CompanySettings() {
       <form onSubmit={save} className="space-y-5 rounded-xl border border-slate-200 bg-white p-5 sm:p-7">
         <div className="grid gap-4 sm:grid-cols-2">
           {fields.map(([name, label, type]) => (
-            <Input
-              key={name}
-              label={label}
-              type={type}
-              min={name === 'graceMinutes' ? 0 : name === 'halfDayThresholdHours' ? 1 : name === 'officeRadiusMeters' ? 10 : undefined}
-              max={name === 'graceMinutes' ? 60 : name === 'halfDayThresholdHours' ? 12 : name === 'officeRadiusMeters' ? 1000 : undefined}
-              step={name === 'halfDayThresholdHours' ? 0.5 : 'any'}
-              value={form[name]}
-              error={errors[name]}
-              required={!['officeLat', 'officeLng'].includes(name)}
-              onChange={(event) => setForm({ ...form, [name]: event.target.value })}
-            />
+            <div key={name}>
+              <Input
+                label={label}
+                type={type}
+                min={name === 'graceMinutes' ? 0 : name === 'halfDayThresholdHours' ? 1 : name === 'officeRadiusMeters' ? 10 : undefined}
+                max={name === 'graceMinutes' ? 60 : name === 'halfDayThresholdHours' ? 12 : name === 'officeRadiusMeters' ? 1000 : undefined}
+                step={name === 'halfDayThresholdHours' ? 0.5 : 'any'}
+                value={form[name]}
+                error={errors[name]}
+                required={!['officeLat', 'officeLng'].includes(name)}
+                onChange={(event) => setForm({ ...form, [name]: event.target.value })}
+              />
+              {name === 'officeLng' && <p className="mt-2 text-xs text-indigo-800">Camera attendance requires these coordinates + radius. Leave blank to disable camera check-in.</p>}
+            </div>
           ))}
         </div>
         <fieldset>

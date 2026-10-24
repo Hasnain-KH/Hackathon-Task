@@ -4,12 +4,14 @@ import LeaveBalanceCards from '../../components/leave/LeaveBalanceCards.jsx';
 import { Link } from 'react-router-dom';
 import { useAiChat } from '../../context/AiChatContext.jsx';
 import Button from '../../components/ui/Button.jsx';
+import LatestAnnouncements from '../../components/comms/LatestAnnouncements.jsx';
 
 export default function EmployeeHome() {
   const { openChat } = useAiChat();
   return (
     <div className="space-y-5">
       <h1 className="text-2xl font-bold text-ink">Employee dashboard</h1>
+      <LatestAnnouncements />
       <CheckInWidget />
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-3">

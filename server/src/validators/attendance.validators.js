@@ -47,3 +47,14 @@ export const locationBody = [
   body('location.accuracy').optional().isFloat({ min: 0 }).withMessage('Location accuracy must be zero or greater.').toFloat(),
   body().custom((value) => Object.keys(value || {}).length === 0 || Object.keys(value || {}).every((key) => key === 'location')).withMessage('Only location may be submitted.'),
 ];
+
+export const cameraCheckIn = [
+  body('faceDetected').isBoolean().withMessage('Face detection result is required.').toBoolean(),
+  body('faceCount').isInt({ min: 0, max: 20 }).withMessage('Face count must be a whole number.').toInt(),
+  body('location').isObject().withMessage('Location is required.'),
+  body('location.lat').isFloat({ min: -90, max: 90 }).withMessage('Latitude is invalid.').toFloat(),
+  body('location.lng').isFloat({ min: -180, max: 180 }).withMessage('Longitude is invalid.').toFloat(),
+  body('location.accuracy').isFloat({ min: 0 }).withMessage('Location accuracy must be zero or greater.').toFloat(),
+  body().custom((value) => Object.keys(value || {}).every((key) => ['faceDetected', 'faceCount', 'location'].includes(key)))
+    .withMessage('Unexpected camera check-in field.'),
+];

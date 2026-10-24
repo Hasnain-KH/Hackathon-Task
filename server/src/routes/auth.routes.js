@@ -6,6 +6,7 @@ import asyncHandler from '../utils/asyncHandler.js';
 import AppError from '../utils/errors.js';
 import { signToken } from '../utils/token.js';
 import validateRequest from '../utils/validateRequest.js';
+import { auditService } from '../services/audit.service.js';
 
 const router = Router();
 
@@ -24,6 +25,7 @@ router.post(
 
     user.lastLoginAt = new Date();
     await user.save();
+    await auditService.log(req, { action: 'LOGIN', entity: 'User', entityId: user._id, after: { lastLoginAt: user.lastLoginAt } });
     res.json({ token: signToken(user), user });
   }),
 );

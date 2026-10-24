@@ -6,6 +6,7 @@ import Department from '../models/Department.js';
 import Employee from '../models/Employee.js';
 import User from '../models/User.js';
 import AppError from '../utils/errors.js';
+import { verifyOffice } from './geo.service.js';
 import {
   getLocalDateString, getLocalMinutes, isWeekend, localDateTime, minutesBetween, parseHHMM,
 } from '../utils/time.js';
@@ -109,7 +110,7 @@ async function applyCorrection(correction, reviewerId) {
 }
 
 export const attendanceService = {
-  async checkIn(actorUserId, { location } = {}) {
+  async createCheckIn(actorUserId, { location, source = 'web', faceDetected = false } = {}) {
     const employeeId = await getEmployeeForUser(actorUserId);
     const date = getLocalDateString();
     if (await Attendance.exists({ employeeId, date })) {
@@ -125,13 +126,28 @@ export const attendanceService = {
         checkInAt: now,
         status: lateMinutes > 0 ? 'late' : 'present',
         lateMinutes,
-        source: 'web',
+        source,
+        faceDetected,
         ...(location ? { location } : {}),
       });
     } catch (error) {
       if (error.code === 11000) throw new AppError(409, 'Already checked in today.');
       throw error;
     }
+  },
+
+  checkIn(actorUserId, { location } = {}) {
+    return this.createCheckIn(actorUserId, { location, source: 'web' });
+  },
+
+  async checkInWithCamera(actorUserId, { location, faceDetected, faceCount }) {
+    if (faceCount !== 1) throw new AppError(422, 'Exactly one face is required.');
+    if (faceDetected !== true) throw new AppError(422, 'A face must be detected before check-in.');
+    const settings = await getSettings();
+    const verification = verifyOffice(location, settings);
+    if (!verification.ok) throw new AppError(422, verification.reason);
+    // Production deployments must perform server-side face verification; this browser flag alone is not identity proof.
+    return this.createCheckIn(actorUserId, { location, source: 'camera', faceDetected: true });
   },
 
   async checkOut(actorUserId) {

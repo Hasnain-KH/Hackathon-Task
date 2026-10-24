@@ -4,13 +4,17 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import Sidebar from './Sidebar.jsx';
 import Button from '../ui/Button.jsx';
 import AiChatPanel from '../ai/AiChatPanel.jsx';
+import NotificationBell from '../comms/NotificationBell.jsx';
+import { Link } from 'react-router-dom';
 
 export default function AppShell() {
   const { user, logout } = useAuth();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [logoutError, setLogoutError] = useState('');
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const signOut = async () => {
+    setUserMenuOpen(false);
     setLogoutError('');
     try {
       await logout();
@@ -30,8 +34,18 @@ export default function AppShell() {
             <span className="text-sm font-semibold capitalize text-ink">{user?.role} workspace</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="hidden text-sm text-slate-600 sm:inline">{user?.name}</span>
-            <Button variant="secondary" className="px-3 py-2" type="button" onClick={signOut}>Log out</Button>
+            <NotificationBell />
+            <div className="relative">
+              <button type="button" aria-label="Open user menu" aria-expanded={userMenuOpen} onClick={() => setUserMenuOpen((open) => !open)}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+                <span className="hidden sm:inline">{user?.name}</span><span className="sm:hidden">Account</span>
+              </button>
+              {userMenuOpen && <div className="absolute right-0 top-12 z-40 w-48 rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
+                {user?.role === 'employee' && <Link className="block rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50" to="/employee/profile" onClick={() => setUserMenuOpen(false)}>Profile</Link>}
+                <Link className="block rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50" to="/change-password" onClick={() => setUserMenuOpen(false)}>Change password</Link>
+                <Button variant="secondary" className="mt-1 w-full justify-start px-3 py-2" type="button" onClick={signOut}>Log out</Button>
+              </div>}
+            </div>
           </div>
         </header>
         <main className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">

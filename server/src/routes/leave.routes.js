@@ -7,6 +7,10 @@ import {
   applyLeave, cancelLeave, employeeIdParam, leaveBalanceYear, leaveRangeQuery,
   listInboxQuery, previewQuery, reviewLeave,
 } from '../validators/leave.validators.js';
+import Employee from '../models/Employee.js';
+import LeaveRequest from '../models/LeaveRequest.js';
+import { auditService } from '../services/audit.service.js';
+import { notificationService } from '../services/notification.service.js';
 
 const router = Router();
 router.use(verifyToken);
@@ -46,7 +50,30 @@ router.get('/inbox', requireRole('admin', 'hr'), listInboxQuery, validate, async
 }));
 
 router.patch('/requests/:id/review', requireRole('admin', 'hr'), reviewLeave, validate, asyncHandler(async (req, res) => {
-  res.json({ data: await leaveService.review(req.params.id, req.user.id, req.body) });
+  const before = await LeaveRequest.findById(req.params.id);
+  const request = await leaveService.review(req.params.id, req.user.id, req.body);
+  await auditService.log(req, {
+    action: req.body.decision === 'approve' ? 'APPROVE' : 'REJECT',
+    entity: 'LeaveRequest',
+    entityId: request._id,
+    before,
+    after: request,
+  });
+  try {
+    const employee = await Employee.findById(request.employeeId).select('userRef');
+    if (employee?.userRef) {
+      await notificationService.create(employee.userRef, {
+        type: 'leave_decision',
+        title: `Leave request ${request.status}`,
+        body: request.reviewComment || `Your leave request was ${request.status}.`,
+        link: '/employee/leave',
+        meta: { leaveRequestId: request._id },
+      });
+    }
+  } catch (error) {
+    console.warn('Leave decision notification failed:', error.message);
+  }
+  res.json({ data: request });
 }));
 
 export default router;

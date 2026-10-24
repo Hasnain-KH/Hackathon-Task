@@ -9,11 +9,16 @@ import leaveRoutes from './leave.routes.js';
 import payrollRoutes from './payroll.routes.js';
 import dashboardRoutes from './dashboard.routes.js';
 import aiRoutes from './ai.routes.js';
+import announcementsRoutes from './announcements.routes.js';
+import notificationsRoutes from './notifications.routes.js';
+import auditRoutes from './audit.routes.js';
+import mongoose from 'mongoose';
 
 const router = Router();
 
 router.get('/health', (req, res) => {
-  res.json({ ok: true, ts: Date.now() });
+  const connected = mongoose.connection.readyState === 1;
+  res.status(connected ? 200 : 503).json({ ok: connected, database: connected ? 'connected' : 'disconnected', ts: Date.now() });
 });
 router.use('/setup', setupRoutes);
 router.use('/auth', authRoutes);
@@ -25,5 +30,8 @@ router.use('/leave', leaveRoutes);
 router.use('/payroll', payrollRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/ai', aiRoutes);
+router.use('/announcements', announcementsRoutes);
+router.use('/notifications', notificationsRoutes);
+router.use('/audit', auditRoutes);
 
 export default router;

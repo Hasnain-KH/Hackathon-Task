@@ -6,6 +6,7 @@ import validate from '../middleware/validate.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import AppError from '../utils/errors.js';
 import { hrUserCreate, resetPassword, userIdParam, userList } from '../validators/org.validators.js';
+import { auditService } from '../services/audit.service.js';
 
 const router = Router();
 router.use(verifyToken, requireRole('admin'));
@@ -24,6 +25,7 @@ router.post(
         mustChangePassword: true,
         isActive: true,
       });
+      await auditService.log(req, { action: 'CREATE', entity: 'User', entityId: user._id, after: user });
       res.status(201).json({
         id: user._id.toString(),
         name: user.name,
@@ -68,8 +70,16 @@ router.patch(
     const user = await User.findById(req.params.id);
     if (!user) throw new AppError(404, 'User not found.');
     if (user.role === 'admin') throw new AppError(403, 'Administrator accounts cannot be changed here.');
+    const before = user.toObject();
     user.isActive = !user.isActive;
     await user.save();
+    await auditService.log(req, {
+      action: user.isActive ? 'UPDATE' : 'DEACTIVATE',
+      entity: 'User',
+      entityId: user._id,
+      before,
+      after: user,
+    });
     res.json({ data: user });
   }),
 );
@@ -82,9 +92,17 @@ router.patch(
     const user = await User.findById(req.params.id);
     if (!user) throw new AppError(404, 'User not found.');
     if (user.role === 'admin') throw new AppError(403, 'Administrator passwords cannot be reset here.');
+    const before = user.toObject();
     user.passwordHash = req.body.tempPassword;
     user.mustChangePassword = true;
     await user.save();
+    await auditService.log(req, {
+      action: 'RESET_PASSWORD',
+      entity: 'User',
+      entityId: user._id,
+      before,
+      after: user,
+    });
     res.json({ data: { id: user._id.toString(), mustChangePassword: true } });
   }),
 );

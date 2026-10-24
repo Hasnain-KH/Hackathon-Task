@@ -32,6 +32,9 @@ import PayrollRuns from './pages/payroll/PayrollRuns.jsx';
 import PayrollRunDetail from './pages/payroll/PayrollRunDetail.jsx';
 import MyPayslips from './pages/payroll/MyPayslips.jsx';
 import { AiChatProvider } from './context/AiChatContext.jsx';
+import Announcements from './pages/comms/Announcements.jsx';
+import Notifications from './pages/comms/Notifications.jsx';
+import AuditLog from './pages/comms/AuditLog.jsx';
 
 function RootRedirect() {
   const { user, loading: authLoading } = useAuth();
@@ -81,6 +84,8 @@ function AppRoutes() {
         <Route element={<ProtectedRoute allow={['admin']} />}>
           <Route element={<AppShell />}>
             <Route path="/admin" element={<AdminHome />} />
+            <Route path="/admin/announcements" element={<Announcements />} />
+            <Route path="/admin/audit" element={<AuditLog />} />
             <Route path="/admin/company" element={<CompanySettings />} />
             <Route path="/admin/departments" element={<Departments />} />
             <Route path="/admin/designations" element={<Designations />} />
@@ -100,6 +105,7 @@ function AppRoutes() {
             <Route path="/admin/payroll/:month" element={<PayrollRunDetail />} />
             <Route path="/hr/payroll" element={<PayrollRuns />} />
             <Route path="/hr/payroll/:month" element={<PayrollRunDetail />} />
+            <Route path="/hr/announcements" element={<Announcements />} />
             <Route path="/admin/attendance" element={<AttendanceBoard />} />
             <Route path="/admin/attendance/corrections" element={<CorrectionsInbox />} />
           </Route>
@@ -120,6 +126,7 @@ function AppRoutes() {
         <Route element={<ProtectedRoute allow={['employee']} />}>
           <Route element={<AppShell />}>
             <Route path="/employee" element={<EmployeeHome />} />
+            <Route path="/employee/announcements" element={<Announcements />} />
             <Route path="/employee/profile" element={<SelfProfile />} />
             {[
               ['attendance', <MyAttendance />],
@@ -127,6 +134,11 @@ function AppRoutes() {
             <Route path="/employee/payslips" element={<MyPayslips />} />
             <Route path="/employee/leave" element={<EmployeeLeave />} />
             <Route path="/employee/attendance/corrections" element={<MyCorrections />} />
+          </Route>
+        </Route>
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AppShell />}>
+            <Route path="/notifications" element={<Notifications />} />
           </Route>
         </Route>
         <Route path="/dashboard" element={<DashboardRedirect />} />

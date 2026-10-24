@@ -1,4 +1,5 @@
 import { getLocalDateString } from './time.js';
+import { workingDaysInRange } from './businessDays.js';
 
 export function isValidMonth(monthStr) {
   if (typeof monthStr !== 'string' || !/^\d{4}-(0[1-9]|1[0-2])$/.test(monthStr)) return false;
@@ -20,27 +21,9 @@ export function monthRange(monthStr) {
   };
 }
 
-function dateStringsBetween(start, end) {
-  const dates = [];
-  const cursor = new Date(`${start}T12:00:00.000Z`);
-  const last = new Date(`${end}T12:00:00.000Z`);
-  while (cursor <= last) {
-    dates.push(cursor.toISOString().slice(0, 10));
-    cursor.setUTCDate(cursor.getUTCDate() + 1);
-  }
-  return dates;
-}
-
-function isWeekend(dateStr, weekendDays) {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
-  return weekendDays.includes(weekday);
-}
-
 export function workingDaysInMonth(monthStr, weekendDays = [0, 6], holidaysDateStrSet = new Set()) {
   const { startDateStr, endDateStr } = monthRange(monthStr);
-  return dateStringsBetween(startDateStr, endDateStr)
-    .filter((date) => !isWeekend(date, weekendDays) && !holidaysDateStrSet.has(date)).length;
+  return workingDaysInRange(startDateStr, endDateStr, weekendDays, holidaysDateStrSet);
 }
 
 export function activeWorkingDaysInMonth(monthStr, joinDate, leaveDate, weekendDays = [0, 6], holidaysDateStrSet = new Set()) {
@@ -50,8 +33,7 @@ export function activeWorkingDaysInMonth(monthStr, joinDate, leaveDate, weekendD
   const activeStart = joinStr > startDateStr ? joinStr : startDateStr;
   const activeEnd = leaveStr < endDateStr ? leaveStr : endDateStr;
   if (activeStart > activeEnd) return 0;
-  return dateStringsBetween(activeStart, activeEnd)
-    .filter((date) => !isWeekend(date, weekendDays) && !holidaysDateStrSet.has(date)).length;
+  return workingDaysInRange(activeStart, activeEnd, weekendDays, holidaysDateStrSet);
 }
 
 export function currentMonthStr() {

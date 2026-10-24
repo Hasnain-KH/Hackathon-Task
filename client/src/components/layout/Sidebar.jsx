@@ -14,6 +14,8 @@ const menus = {
     ['Corrections', '/admin/attendance/corrections'],
     ['Leave Requests', '/admin/leave'],
     ['Payroll', '/admin/payroll'],
+    ['Announcements', '/admin/announcements'],
+    ['Audit Log', '/admin/audit'],
     ['Settings', '/admin/settings', true],
   ],
   hr: [
@@ -23,6 +25,7 @@ const menus = {
     ['Corrections', '/hr/attendance/corrections'],
     ['Leave', '/hr/leave'],
     ['Payroll', '/hr/payroll'],
+    ['Announcements', '/hr/announcements'],
   ],
   employee: [
     ['Dashboard', '/employee'],
@@ -30,6 +33,7 @@ const menus = {
     ['My Attendance', '/employee/attendance'],
     ['My Leave', '/employee/leave'],
     ['My Payslips', '/employee/payslips'],
+    ['Announcements', '/employee/announcements'],
   ],
 };
 

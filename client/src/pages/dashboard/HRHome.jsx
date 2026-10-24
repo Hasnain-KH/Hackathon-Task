@@ -1,11 +1,13 @@
 import PlaceholderPage from '../PlaceholderPage.jsx';
 import { Link } from 'react-router-dom';
 import AiSummaryButton from '../../components/ai/AiSummaryButton.jsx';
+import LatestAnnouncements from '../../components/comms/LatestAnnouncements.jsx';
 
 export default function HRHome() {
   return (
     <div className="space-y-5">
       <PlaceholderPage title="HR dashboard" />
+      <LatestAnnouncements />
       <section className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5">
         <div><h2 className="font-semibold text-ink">Dashboard insights</h2><p className="mt-1 text-sm text-slate-500">Summarize headcount, attendance, late arrivals, and leave.</p></div>
         <AiSummaryButton feature="hr" />

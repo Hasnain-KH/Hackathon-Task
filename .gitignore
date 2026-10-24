@@ -3,20 +3,33 @@ node_modules/
 
 # Environment files
 .env
+.env.local
 .env.*
+.env.*.local
+.env.development
+.env.production
 !.env.example
+!.env.*.example
+server/.env
+server/.env.local
+client/.env
+client/.env.local
 
 # Build output
 client/dist/
 server/dist/
 dist/
+build/
 
 # Logs
+*.log
 yarn-debug.log*
 pnpm-debug.log*
 
 # Operating system and editor files
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/
 .vscode/*
 !.vscode/extensions.json

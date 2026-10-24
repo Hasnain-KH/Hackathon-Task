@@ -1,11 +1,4 @@
-const formatter = new Intl.NumberFormat('en-PK', {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
-
-export function formatCurrency(value) {
-  return `PKR ${formatter.format(Number(value) || 0)}`;
-}
+export { formatCurrency } from '../../utils/format.js';
 
 export async function downloadPayslip(api, payslip, endpoint, onDownloading) {
   onDownloading?.(true);

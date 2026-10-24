@@ -6,6 +6,7 @@ import Input from '../../components/ui/Input.jsx';
 import Loader from '../../components/ui/Loader.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { apiErrorMessage, apiFieldErrors } from '../../components/ui/useApiError.js';
+import { formatDate } from '../../utils/format.js';
 
 function Detail({ label, value }) {
   return <div><dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</dt><dd className="mt-1 text-sm text-slate-800">{value || '—'}</dd></div>;
@@ -64,7 +65,7 @@ export default function SelfProfile() {
             <Detail label="Email" value={employee.email} />
             <Detail label="Department" value={employee.departmentId?.name} />
             <Detail label="Designation" value={employee.designationId?.name} />
-            <Detail label="Date joined" value={new Date(employee.dateOfJoining).toLocaleDateString()} />
+            <Detail label="Date joined" value={formatDate(employee.dateOfJoining)} />
           </dl>
         </section>
         <form onSubmit={save} className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">

@@ -9,6 +9,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import EmployeeForm from './EmployeeForm.jsx';
 import { apiErrorMessage } from '../../components/ui/useApiError.js';
 import EmployeeLeaveTab from '../../components/leave/EmployeeLeaveTab.jsx';
+import { formatCurrency, formatDate } from '../../utils/format.js';
 
 function Detail({ label, children }) {
   return <div><dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</dt><dd className="mt-1 text-sm text-slate-800">{children || '—'}</dd></div>;
@@ -44,7 +45,11 @@ export default function EmployeeProfile() {
   if (!employee) return null;
 
   const fullName = `${employee.firstName} ${employee.lastName}`;
-  const gross = (employee.salary?.basic || 0) * 1.5;
+  const salary = employee.salary || {};
+  const allowanceTotal = Number(salary.hra || 0) + Number(salary.medical || 0) + Number(salary.transport || 0) + Number(salary.other || 0);
+  const gross = allowanceTotal === 0
+    ? Number(salary.basic || 0) * 1.5
+    : Number(salary.basic || 0) + allowanceTotal;
 
   return (
     <div className="space-y-5">
@@ -73,20 +78,20 @@ export default function EmployeeProfile() {
           <Detail label="Phone">{employee.phone}</Detail>
           <Detail label="Address">{employee.address}</Detail>
           <Detail label="Gender">{employee.gender?.replaceAll('_', ' ')}</Detail>
-          <Detail label="Date of birth">{employee.dateOfBirth ? new Date(employee.dateOfBirth).toLocaleDateString() : '—'}</Detail>
-          <Detail label="Date joined">{new Date(employee.dateOfJoining).toLocaleDateString()}</Detail>
+          <Detail label="Date of birth">{employee.dateOfBirth ? formatDate(employee.dateOfBirth) : '—'}</Detail>
+          <Detail label="Date joined">{formatDate(employee.dateOfJoining)}</Detail>
           <Detail label="Employment type">{employee.employmentType?.replaceAll('_', ' ')}</Detail>
           <Detail label="Department">{employee.departmentId?.name}</Detail>
           <Detail label="Designation">{employee.designationId?.name}</Detail>
           <Detail label="Reporting to">{employee.reportingTo ? `${employee.reportingTo.firstName} ${employee.reportingTo.lastName}` : '—'}</Detail>
         </dl>}
         {tab === 'Salary' && <dl className="grid gap-x-8 gap-y-6 pt-6 sm:grid-cols-2 lg:grid-cols-3">
-          <Detail label="Basic">{employee.salary.basic}</Detail>
-          <Detail label="HRA">{employee.salary.hra}</Detail>
-          <Detail label="Medical allowance">{employee.salary.medical}</Detail>
-          <Detail label="Transport allowance">{employee.salary.transport}</Detail>
-          <Detail label="Other allowance">{employee.salary.other}</Detail>
-          <Detail label="Gross (1.5 × basic)">{gross.toFixed(2)}</Detail>
+          <Detail label="Basic">{formatCurrency(employee.salary.basic)}</Detail>
+          <Detail label="HRA">{formatCurrency(employee.salary.hra)}</Detail>
+          <Detail label="Medical allowance">{formatCurrency(employee.salary.medical)}</Detail>
+          <Detail label="Transport allowance">{formatCurrency(employee.salary.transport)}</Detail>
+          <Detail label="Other allowance">{formatCurrency(employee.salary.other)}</Detail>
+          <Detail label="Gross">{formatCurrency(gross)}</Detail>
         </dl>}
         {tab === 'Leave' && <EmployeeLeaveTab employeeId={employee._id} />}
         {tab === 'Attendance' && <p className="py-12 text-center text-sm text-slate-500">Coming soon.</p>}

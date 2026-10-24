@@ -10,6 +10,7 @@ import Modal from '../../components/ui/Modal.jsx';
 import Table from '../../components/ui/Table.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { apiErrorMessage, apiFieldErrors } from '../../components/ui/useApiError.js';
+import { formatDate } from '../../utils/format.js';
 
 const emptyForm = { name: '', date: '', isOptional: false };
 
@@ -103,7 +104,7 @@ export default function Holidays() {
             <section key={groupYear} className="space-y-3">
               <h2 className="text-lg font-semibold text-ink">{groupYear}</h2>
               <Table rows={holidays} columns={[
-                { key: 'date', label: 'Date', render: (item) => new Date(item.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', timeZone: 'UTC' }) },
+                { key: 'date', label: 'Date', render: (item) => formatDate(item.date) },
                 { key: 'name', label: 'Holiday' },
                 { key: 'optional', label: 'Type', render: (item) => item.isOptional ? <Badge tone="amber">Optional</Badge> : <Badge tone="blue">Public</Badge> },
                 { key: 'actions', label: 'Actions', render: (item) => <div className="flex gap-2"><Button variant="secondary" className="px-3 py-1.5" type="button" onClick={() => open(item)}>Edit</Button><Button variant="danger" className="px-3 py-1.5" type="button" onClick={() => setPending(item)}>Delete</Button></div> },
