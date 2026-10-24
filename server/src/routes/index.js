@@ -7,6 +7,8 @@ import setupRoutes from './setup.routes.js';
 import usersRoutes from './users.routes.js';
 import leaveRoutes from './leave.routes.js';
 import payrollRoutes from './payroll.routes.js';
+import dashboardRoutes from './dashboard.routes.js';
+import aiRoutes from './ai.routes.js';
 
 const router = Router();
 
@@ -21,5 +23,7 @@ router.use('/employees', employeeRoutes);
 router.use('/attendance', attendanceRoutes);
 router.use('/leave', leaveRoutes);
 router.use('/payroll', payrollRoutes);
+router.use('/dashboard', dashboardRoutes);
+router.use('/ai', aiRoutes);
 
 export default router;

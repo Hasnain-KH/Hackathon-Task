@@ -31,6 +31,7 @@ import LeaveInbox from './pages/leave/LeaveInbox.jsx';
 import PayrollRuns from './pages/payroll/PayrollRuns.jsx';
 import PayrollRunDetail from './pages/payroll/PayrollRunDetail.jsx';
 import MyPayslips from './pages/payroll/MyPayslips.jsx';
+import { AiChatProvider } from './context/AiChatContext.jsx';
 
 function RootRedirect() {
   const { user, loading: authLoading } = useAuth();
@@ -139,7 +140,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <ToastProvider>
-        <AppRoutes />
+        <AiChatProvider>
+          <AppRoutes />
+        </AiChatProvider>
       </ToastProvider>
     </BrowserRouter>
   );

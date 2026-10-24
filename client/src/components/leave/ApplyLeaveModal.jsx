@@ -5,8 +5,11 @@ import Input from '../ui/Input.jsx';
 import Modal from '../ui/Modal.jsx';
 import Select from '../ui/Select.jsx';
 import { apiErrorMessage, apiFieldErrors } from '../ui/useApiError.js';
+import { useAuth } from '../../context/AuthContext.jsx';
+import SmartLeaveBox from '../ai/SmartLeaveBox.jsx';
 
 export default function ApplyLeaveModal({ onClose, onApplied }) {
+  const { user } = useAuth();
   const [leaveTypes, setLeaveTypes] = useState([]);
   const [form, setForm] = useState({ leaveTypeId: '', startDate: '', endDate: '', reason: '' });
   const [preview, setPreview] = useState(null);
@@ -59,6 +62,12 @@ export default function ApplyLeaveModal({ onClose, onApplied }) {
     <Modal title="Apply for leave" onClose={onClose} onConfirm={submit} confirmLabel="Submit request" loading={loading}>
       <div className="space-y-4">
         <ErrorBanner>{error}</ErrorBanner>
+        {user?.role === 'employee' && <SmartLeaveBox onPrefill={(values) => setForm({
+          leaveTypeId: values.leaveTypeId,
+          startDate: values.startDate,
+          endDate: values.endDate,
+          reason: values.reason,
+        })} />}
         <Select label="Leave type" value={form.leaveTypeId} error={fieldErrors.leaveTypeId} onChange={(event) => setField('leaveTypeId', event.target.value)}>
           <option value="">Select leave type</option>
           {leaveTypes.map((type) => <option key={type._id} value={type._id}>{type.name} · {type.quotaPerYear === 0 ? 'Unlimited' : `${type.quotaPerYear} days/year`}</option>)}

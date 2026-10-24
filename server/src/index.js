@@ -5,6 +5,9 @@ import app from './app.js';
 import { connectDB } from './config/db.js';
 import CompanySettings from './models/CompanySettings.js';
 import User from './models/User.js';
+import { warnAiConfiguration } from './config/ai.js';
+
+warnAiConfiguration();
 
 async function initializeFromEnvironment() {
   if (!(process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD)) {

@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import Sidebar from './Sidebar.jsx';
 import Button from '../ui/Button.jsx';
+import AiChatPanel from '../ai/AiChatPanel.jsx';
 
 export default function AppShell() {
   const { user, logout } = useAuth();
@@ -38,6 +39,7 @@ export default function AppShell() {
           <Outlet />
         </main>
       </div>
+      <AiChatPanel />
     </div>
   );
 }

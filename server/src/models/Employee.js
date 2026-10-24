@@ -33,4 +33,6 @@ const employeeSchema = new mongoose.Schema(
   },
 );
 
+employeeSchema.index({ status: 1, departmentId: 1, dateOfJoining: 1, dateOfLeaving: 1 });
+
 export default mongoose.model('Employee', employeeSchema);

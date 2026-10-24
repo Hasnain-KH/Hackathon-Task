@@ -64,6 +64,22 @@ Attendance records use server-stamped check-in and check-out times, with local w
 
 Employees can review their annual leave balances, preview working days, apply for leave, and cancel eligible requests. HR/Admin can review pending requests; approvals update eligible attendance dates to `on_leave`. Weekends and configured public holidays are excluded from working-day counts. Leave types, quotas, and holidays are configured through Organization Setup; no leave types or other sample data are seeded.
 
+## AI assistant
+
+Configure the AI provider only on the server in `server/.env`:
+
+```dotenv
+AI_API_KEY=your_provider_key
+AI_BASE_URL=https://api.openai.com/v1
+AI_MODEL=gpt-4o-mini
+```
+
+The API uses OpenAI-compatible Chat Completions and function calling. Free or trial keys may be available from [Groq](https://console.groq.com/keys), [OpenRouter](https://openrouter.ai/keys), or [Google AI Studio](https://aistudio.google.com/apikey); set the matching compatible base URL and model for your provider. If no key is configured, the app still starts and AI endpoints return a friendly 503.
+
+The assistant can answer policy questions, summarize server-generated dashboard data, look up role-permitted information, and pre-fill (but never submit) an employee leave request. Employees cannot search other employees or receive another person's salary, attendance, leave, or personal data. It does not write business records. Chat history is kept in browser memory only and is cleared on refresh.
+
+Requests are limited to 20 per user per hour using an in-memory server map; limits reset when the server restarts. Prompts, responses, tool-call metadata, and timings are recorded in `AiLog` for debugging. Password fields are not accepted by AI endpoints and credential-like prompt values are redacted before logging. The provider key is server-only and is never sent to the browser or stored in AI logs.
+
 ## Payroll Lite
 
 HR can generate and refresh monthly payroll drafts from employee salary structures, attendance, approved leave, company weekends, and public holidays. Admins finalize drafts, after which they are locked; employees can only access and download their finalized payslips. Payroll PDF generation uses PDFKit. Tax slabs follow the illustrative annualized rules supplied for this step. No payroll or employee seed data is added.

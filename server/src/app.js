@@ -15,7 +15,7 @@ app.use('/api', apiRoutes);
 app.use((req, res, next) => next(new AppError(404, 'Route not found.')));
 app.use((error, req, res, next) => {
   const statusCode = error.statusCode || error.status || 500;
-  const message = statusCode >= 500 ? 'Internal server error.' : error.message;
+  const message = error.expose ? error.message : 'Internal server error.';
   if (statusCode >= 500) {
     console.error(error);
   }

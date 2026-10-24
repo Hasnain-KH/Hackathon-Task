@@ -8,8 +8,10 @@ import Loader from '../../components/ui/Loader.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { apiErrorMessage } from '../../components/ui/useApiError.js';
 import { downloadPayslip, formatCurrency } from '../../components/payroll/currency.js';
+import { useAiChat } from '../../context/AiChatContext.jsx';
 
 export default function MyPayslips() {
+  const { openChat } = useAiChat();
   const toast = useToast();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +50,7 @@ export default function MyPayslips() {
 
   return (
     <div className="space-y-5">
-      <div><h1 className="text-2xl font-bold text-ink">My payslips</h1><p className="mt-1 text-sm text-slate-500">Download finalized monthly payslips.</p></div>
+      <div className="flex flex-wrap items-start justify-between gap-3"><div><h1 className="text-2xl font-bold text-ink">My payslips</h1><p className="mt-1 text-sm text-slate-500">Download finalized monthly payslips.</p></div><button type="button" className="text-sm font-semibold text-brand hover:underline" onClick={() => openChat('What is my last payslip?')}>Ask assistant</button></div>
       <ErrorBanner>{error}</ErrorBanner>
       {loading ? <Loader label="Loading payslips" /> : items.length ? (
         <>
