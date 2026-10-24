@@ -8,6 +8,7 @@ import Loader from '../../components/ui/Loader.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import EmployeeForm from './EmployeeForm.jsx';
 import { apiErrorMessage } from '../../components/ui/useApiError.js';
+import EmployeeLeaveTab from '../../components/leave/EmployeeLeaveTab.jsx';
 
 function Detail({ label, children }) {
   return <div><dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</dt><dd className="mt-1 text-sm text-slate-800">{children || '—'}</dd></div>;
@@ -87,7 +88,7 @@ export default function EmployeeProfile() {
           <Detail label="Other allowance">{employee.salary.other}</Detail>
           <Detail label="Gross (1.5 × basic)">{gross.toFixed(2)}</Detail>
         </dl>}
-        {tab === 'Leave' && <p className="py-12 text-center text-sm text-slate-500">Coming soon.</p>}
+        {tab === 'Leave' && <EmployeeLeaveTab employeeId={employee._id} />}
         {tab === 'Attendance' && <p className="py-12 text-center text-sm text-slate-500">Coming soon.</p>}
       </section>
       {editing && <EmployeeForm employee={employee} onClose={() => setEditing(false)} onSaved={load} />}

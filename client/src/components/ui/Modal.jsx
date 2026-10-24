@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import Button from './Button.jsx';
 
-export default function Modal({ title, children, onClose, onConfirm, confirmLabel = 'Save', loading = false, danger = false }) {
+export default function Modal({ title, children, onClose, onConfirm, confirmLabel = 'Save', loading = false, danger = false, confirmDisabled = false }) {
   useEffect(() => {
     const closeOnEscape = (event) => {
       if (event.key === 'Escape' && !loading) onClose();
@@ -19,7 +19,7 @@ export default function Modal({ title, children, onClose, onConfirm, confirmLabe
         <div className="mt-5">{children}</div>
         <div className="mt-6 flex justify-end gap-3">
           <Button variant="secondary" type="button" disabled={loading} onClick={onClose}>Cancel</Button>
-          {onConfirm && <Button variant={danger ? 'danger' : 'primary'} type="button" disabled={loading} onClick={onConfirm}>{loading ? 'Please wait…' : confirmLabel}</Button>}
+          {onConfirm && <Button variant={danger ? 'danger' : 'primary'} type="button" disabled={loading || confirmDisabled} onClick={onConfirm}>{loading ? 'Please wait…' : confirmLabel}</Button>}
         </div>
       </section>
     </div>

@@ -12,6 +12,7 @@ const menus = {
     ['Employees', '/admin/employees'],
     ['Attendance', '/admin/attendance'],
     ['Corrections', '/admin/attendance/corrections'],
+    ['Leave Requests', '/admin/leave'],
     ['Payroll', '/admin/payroll'],
     ['Settings', '/admin/settings', true],
   ],

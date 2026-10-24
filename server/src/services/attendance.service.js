@@ -1,6 +1,7 @@
 import Attendance from '../models/Attendance.js';
 import AttendanceCorrection from '../models/AttendanceCorrection.js';
 import CompanySettings from '../models/CompanySettings.js';
+import LeaveRequest from '../models/LeaveRequest.js';
 import Department from '../models/Department.js';
 import Employee from '../models/Employee.js';
 import User from '../models/User.js';
@@ -202,6 +203,13 @@ export const attendanceService = {
       .sort({ lastName: 1, firstName: 1 });
     const attendance = await Attendance.find({ date, employeeId: { $in: employees.map((employee) => employee._id) } });
     const attendanceMap = new Map(attendance.map((record) => [record.employeeId.toString(), record]));
+    const leaveEmployeeIds = await LeaveRequest.distinct('employeeId', {
+      status: 'approved',
+      startDate: { $lte: date },
+      endDate: { $gte: date },
+      employeeId: { $in: employees.map((employee) => employee._id) },
+    });
+    const onLeave = new Set(leaveEmployeeIds.map((id) => id.toString()));
     const settings = await getSettings();
     const isFuture = date > today;
     const isToday = date === today;
@@ -212,6 +220,7 @@ export const attendanceService = {
       if (record) displayStatus = record.status;
       else if (isFuture) displayStatus = 'scheduled';
       else if (isToday && beforeEndOfDay) displayStatus = 'not_checked_in';
+      else if (onLeave.has(employee._id.toString())) displayStatus = 'on_leave';
       else displayStatus = 'absent';
       return {
         employeeId: employee._id,
@@ -228,7 +237,7 @@ export const attendanceService = {
       };
     });
     const totals = {
-      present: 0, late: 0, halfDay: 0, absent: 0, missingCheckout: 0, notCheckedIn: 0,
+      present: 0, late: 0, halfDay: 0, absent: 0, missingCheckout: 0, notCheckedIn: 0, onLeave: 0,
     };
     const totalKeys = {
       present: 'present',
@@ -237,6 +246,7 @@ export const attendanceService = {
       absent: 'absent',
       missing_checkout: 'missingCheckout',
       not_checked_in: 'notCheckedIn',
+      on_leave: 'onLeave',
     };
     for (const item of items) if (totalKeys[item.status]) totals[totalKeys[item.status]] += 1;
 

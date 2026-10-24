@@ -99,13 +99,14 @@ export default function AttendanceBoard() {
           {['present', 'late', 'half_day', 'absent', 'missing_checkout', 'not_checked_in', 'scheduled', 'on_leave'].map((value) => <option key={value} value={value}>{value.replaceAll('_', ' ')}</option>)}
         </Select>
       </div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         <Summary label="Present" value={totals.present || 0} />
         <Summary label="Late" value={totals.late || 0} />
         <Summary label="Half day" value={totals.halfDay || 0} />
         <Summary label="Absent" value={totals.absent || 0} />
         <Summary label="Missing checkout" value={totals.missingCheckout || 0} />
         <Summary label="Not checked in" value={totals.notCheckedIn || 0} />
+        <Summary label="On leave" value={totals.onLeave || 0} />
       </div>
       <ErrorBanner>{error}</ErrorBanner>
       {loading ? <Loader label="Loading attendance board" /> : items.length ? <>

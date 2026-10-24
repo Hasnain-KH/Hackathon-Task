@@ -26,6 +26,11 @@ import MyAttendance from './pages/attendance/MyAttendance.jsx';
 import MyCorrections from './pages/attendance/MyCorrections.jsx';
 import AttendanceBoard from './pages/attendance/AttendanceBoard.jsx';
 import CorrectionsInbox from './pages/attendance/CorrectionsInbox.jsx';
+import EmployeeLeave from './pages/leave/EmployeeLeave.jsx';
+import LeaveInbox from './pages/leave/LeaveInbox.jsx';
+import PayrollRuns from './pages/payroll/PayrollRuns.jsx';
+import PayrollRunDetail from './pages/payroll/PayrollRunDetail.jsx';
+import MyPayslips from './pages/payroll/MyPayslips.jsx';
 
 function RootRedirect() {
   const { user, loading: authLoading } = useAuth();
@@ -81,15 +86,19 @@ function AppRoutes() {
             <Route path="/admin/leave-types" element={<LeaveTypes />} />
             <Route path="/admin/holidays" element={<Holidays />} />
             <Route path="/admin/hr-users" element={<HRUsers />} />
+            <Route path="/admin/leave" element={<LeaveInbox />} />
             <Route path="/admin/settings" element={<PlaceholderPage title="Settings — coming later" />} />
             <Route path="/admin/employees" element={<EmployeeList />} />
             <Route path="/admin/employees/:id" element={<EmployeeProfile />} />
             <Route path="/admin/employees/import" element={<CSVImport />} />
-            <Route path="/admin/payroll" element={<PlaceholderPage title="Payroll — coming later" />} />
           </Route>
         </Route>
         <Route element={<ProtectedRoute allow={['admin', 'hr']} />}>
           <Route element={<AppShell />}>
+            <Route path="/admin/payroll" element={<PayrollRuns />} />
+            <Route path="/admin/payroll/:month" element={<PayrollRunDetail />} />
+            <Route path="/hr/payroll" element={<PayrollRuns />} />
+            <Route path="/hr/payroll/:month" element={<PayrollRunDetail />} />
             <Route path="/admin/attendance" element={<AttendanceBoard />} />
             <Route path="/admin/attendance/corrections" element={<CorrectionsInbox />} />
           </Route>
@@ -100,9 +109,8 @@ function AppRoutes() {
             {[
               ['employees', <EmployeeList />],
               ['attendance', <AttendanceBoard />],
-              ['leave', 'Leave — coming later'],
-              ['payroll', 'Payroll — coming later'],
             ].map(([path, element]) => <Route key={path} path={`/hr/${path}`} element={typeof element === 'string' ? <PlaceholderPage title={element} /> : element} />)}
+            <Route path="/hr/leave" element={<LeaveInbox />} />
             <Route path="/hr/employees/:id" element={<EmployeeProfile />} />
             <Route path="/hr/employees/import" element={<CSVImport />} />
             <Route path="/hr/attendance/corrections" element={<CorrectionsInbox />} />
@@ -114,9 +122,9 @@ function AppRoutes() {
             <Route path="/employee/profile" element={<SelfProfile />} />
             {[
               ['attendance', <MyAttendance />],
-              ['leave', 'My leave — coming later'],
-              ['payslips', 'My payslips — coming later'],
             ].map(([path, title]) => <Route key={path} path={`/employee/${path}`} element={typeof title === 'string' ? <PlaceholderPage title={title} /> : title} />)}
+            <Route path="/employee/payslips" element={<MyPayslips />} />
+            <Route path="/employee/leave" element={<EmployeeLeave />} />
             <Route path="/employee/attendance/corrections" element={<MyCorrections />} />
           </Route>
         </Route>

@@ -59,3 +59,11 @@ HR can register employee records and initial logins, search and filter the direc
 ## Attendance module
 
 Attendance records use server-stamped check-in and check-out times, with local work dates based on `TZ` (defaults to `Asia/Karachi`). Employees can review their calendar and request corrections; HR/Admin can view the daily board and review requests. Camera capture and location enforcement are not included.
+
+## Leave module
+
+Employees can review their annual leave balances, preview working days, apply for leave, and cancel eligible requests. HR/Admin can review pending requests; approvals update eligible attendance dates to `on_leave`. Weekends and configured public holidays are excluded from working-day counts. Leave types, quotas, and holidays are configured through Organization Setup; no leave types or other sample data are seeded.
+
+## Payroll Lite
+
+HR can generate and refresh monthly payroll drafts from employee salary structures, attendance, approved leave, company weekends, and public holidays. Admins finalize drafts, after which they are locked; employees can only access and download their finalized payslips. Payroll PDF generation uses PDFKit. Tax slabs follow the illustrative annualized rules supplied for this step. No payroll or employee seed data is added.

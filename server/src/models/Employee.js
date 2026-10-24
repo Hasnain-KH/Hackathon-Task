@@ -11,6 +11,7 @@ const employeeSchema = new mongoose.Schema(
     gender: { type: String, enum: ['male', 'female', 'other', 'prefer_not_to_say'] },
     dateOfBirth: { type: Date },
     dateOfJoining: { type: Date, required: true },
+    dateOfLeaving: { type: Date },
     employmentType: { type: String, enum: ['full_time', 'part_time', 'contract', 'intern'], default: 'full_time' },
     status: { type: String, enum: ['active', 'probation', 'resigned', 'terminated'], default: 'active' },
     departmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Department', required: true },

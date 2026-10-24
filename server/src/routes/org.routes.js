@@ -33,7 +33,7 @@ router.delete('/designations/:id', ...admin, orgIdParam, validate, asyncHandler(
   res.json({ data: await orgService.deactivateDesignation(req.params.id) });
 }));
 
-router.get('/leave-types', ...adminAndHr, leaveTypeList, validate, sendList((req) => orgService.listLeaveTypes(req.query)));
+router.get('/leave-types', ...allRoles, leaveTypeList, validate, sendList((req) => orgService.listLeaveTypes(req.query)));
 router.post('/leave-types', ...admin, leaveTypeCreate, validate, sendData((req) => orgService.createLeaveType(req.body)));
 router.patch('/leave-types/:id', ...admin, leaveTypeUpdate, validate, sendData((req) => orgService.updateLeaveType(req.params.id, req.body)));
 router.delete('/leave-types/:id', ...admin, orgIdParam, validate, asyncHandler(async (req, res) => {
