@@ -11,15 +11,9 @@ const app = express();
 
 app.set('trust proxy', 1);
 app.use(helmet());
-const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
-  .split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean);
 app.use(cors({
-  origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new AppError(403, 'Origin is not allowed.'));
-  },
+  origin: process.env.CLIENT_ORIGIN || '*',
+  credentials: true,
 }));
 app.use(express.json());
 app.use(morgan('dev'));

@@ -1,4 +1,4 @@
-process.env.Timezone = process.env.Timezone || 'Asia/Karachi';
+process.env.TZ = process.env.TZ || 'Asia/Karachi';
 
 import 'dotenv/config';
 import app from './app.js';
@@ -44,7 +44,16 @@ async function startServer() {
   }
 
   const port = Number(process.env.PORT) || 5000;
-  app.listen(port, () => console.info(`HCM Lite API listening on port ${port}.`));
+  if (process.env.VERCEL !== '1') {
+    app.listen(port, () => console.info(`Server listening on ${port}`));
+  }
 }
 
-startServer();
+if (process.env.VERCEL === '1') {
+  await connectDB();
+  await initializeFromEnvironment();
+} else {
+  startServer();
+}
+
+export default app;

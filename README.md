@@ -99,6 +99,11 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173). Vite proxies `/api` to the server.
 
+The root `npm run dev` command starts both the API and frontend. MongoDB must be
+running at `mongodb://127.0.0.1:27017/hcm_lite` (the default), or `MONGO_URI`
+must point to a reachable MongoDB instance in `server/.env`. Without a database,
+the API can start but the app cannot complete setup or sign in.
+
 ## Completed and not included
 
 Authentication, organization setup, employees, attendance, leave, payroll, dashboards, AI assistance, announcements, personal notifications, and administrative audit history are implemented. The application does not include sample data. Camera attendance is an optional browser-only face-count plus server geofence check; it is not biometric identity verification. Advanced analytics and automated AI actions are not included.

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { body } from 'express-validator';
+import mongoose from 'mongoose';
 import CompanySettings from '../models/CompanySettings.js';
 import User from '../models/User.js';
 import asyncHandler from '../utils/asyncHandler.js';
@@ -12,6 +13,14 @@ const router = Router();
 router.get(
   '/status',
   asyncHandler(async (req, res) => {
+    if (mongoose.connection.readyState !== 1) {
+      throw new AppError(
+        503,
+        'Database is unavailable. Start MongoDB or configure MONGO_URI in server/.env.',
+        { expose: true },
+      );
+    }
+
     const settings = await CompanySettings.getSingleton();
     res.json({ initialized: Boolean(settings) });
   }),
