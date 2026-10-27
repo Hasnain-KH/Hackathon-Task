@@ -24,6 +24,25 @@ export async function chatOnce({ messages, tools, timeoutMs = 15000 }) {
       signal: controller.signal,
     });
     if (!response.ok) {
+      let providerCode = null;
+      try {
+        const payload = await response.json();
+        const providerError = payload && typeof payload === 'object' && !Array.isArray(payload)
+          ? payload.error
+          : null;
+        const candidate = providerError && typeof providerError === 'object' && !Array.isArray(providerError)
+          ? providerError.code ?? providerError.type
+          : null;
+        if (typeof candidate === 'string' && /^[A-Za-z0-9_.-]{1,64}$/.test(candidate)) {
+          providerCode = candidate;
+        }
+      } catch (error) {
+        if (error?.name === 'AbortError') throw error;
+      }
+      console.warn('AI provider request failed', {
+        upstreamStatus: response.status,
+        providerCode,
+      });
       return {
         ok: false,
         status: 'provider_unavailable',
