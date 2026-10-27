@@ -1,5 +1,8 @@
 export const apiKey = process.env.AI_API_KEY;
-export const baseUrl = (process.env.AI_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta/openai/').replace(/\/+$/, '');
+// export const baseUrl = (process.env.AI_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta/openai/').replace(/\/+$/, '');
+
+export const baseUrl = (process.env.AI_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta/openai').replace(/\/+$/, '');
+
 export const model = process.env.AI_MODEL || 'gemini-2.0-flash';
 export const isConfigured = Boolean(process.env.AI_API_KEY);
 
