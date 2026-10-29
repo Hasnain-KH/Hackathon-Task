@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import { body, validationResult } from 'express-validator';
-import { verifyToken } from '../middleware/auth.js';
+import { requireRole, verifyToken } from '../middleware/auth.js';
 import AiLog from '../models/AiLog.js';
 import CompanySettings from '../models/CompanySettings.js';
 import LeaveType from '../models/LeaveType.js';
 import User from '../models/User.js';
 import aiRateLimit from '../middleware/aiRateLimit.js';
-import { isConfigured, model } from '../config/ai.js';
+import { apiKey, baseUrl, isConfigured, model } from '../config/ai.js';
 import { getToolDefinitions, getToolHandlers } from '../ai/tools.js';
 import {
   buildPolicyPrompt, buildSmartLeavePrompt, buildSystemPrompt, SUMMARY_PROMPT,
@@ -15,6 +15,7 @@ import { dashboardService } from '../services/dashboard.service.js';
 import { callWithRetry, chatOnce, runWithTools } from '../services/ai.service.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import AppError from '../utils/errors.js';
+import { sanitizeProviderErrorCode, sanitizeProviderErrorStatus } from '../utils/providerError.js';
 import { resolveDateRange } from '../utils/dateRange.js';
 import { getLocalDateString } from '../utils/time.js';
 
@@ -168,6 +169,64 @@ async function summaryData(feature, filters, user) {
   }
   return result;
 }
+
+router.post('/provider-diagnostic', verifyToken, requireRole('admin'), aiRateLimit, asyncHandler(async (req, res) => {
+  const startedAt = Date.now();
+  let httpStatus = null;
+  let providerErrorCode = null;
+  let providerErrorStatus = null;
+  const result = () => ({
+    httpStatus,
+    elapsedMs: Date.now() - startedAt,
+    providerErrorCode,
+    providerErrorStatus,
+  });
+
+  if (!apiKey) return res.status(503).json(result());
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+
+  try {
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'user', content: 'Reply with OK.' }],
+      }),
+      signal: controller.signal,
+    });
+    httpStatus = response.status;
+    if (response.ok && response.body) {
+      const reader = response.body.getReader();
+      while (!(await reader.read()).done) {
+        // Consume and discard the body so elapsedMs covers the full provider response.
+      }
+    } else if (!response.ok) {
+      try {
+        const payload = await response.json();
+        const providerError = payload && typeof payload === 'object' && !Array.isArray(payload)
+          ? payload.error
+          : null;
+        if (providerError && typeof providerError === 'object' && !Array.isArray(providerError)) {
+          providerErrorCode = sanitizeProviderErrorCode(providerError.code ?? providerError.type);
+          providerErrorStatus = sanitizeProviderErrorStatus(providerError.status);
+        }
+      } catch (error) {
+        if (error?.name === 'AbortError') throw error;
+      }
+    }
+    return res.json(result());
+  } catch (error) {
+    return res.status(error?.name === 'AbortError' ? 504 : 502).json(result());
+  } finally {
+    clearTimeout(timeout);
+  }
+}));
 
 router.use(verifyToken, aiRateLimit, requireConfigured);
 
