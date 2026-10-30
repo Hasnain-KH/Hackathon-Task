@@ -250,7 +250,7 @@ router.post('/chat', [
     messages,
     toolDefinitions: getToolDefinitions(user),
     toolHandlers: getToolHandlers(user),
-    timeoutMs: 15000,
+    timeoutMs: 45000,
   });
   const latencyMs = Date.now() - started;
   if (!result.ok) {
