@@ -2,8 +2,8 @@
 Human Capital Management for small teams, built as a role-based full-stack application.
 
 ## Live links
-- Frontend: `<url>`
-- Backend: `<url>`
+- Frontend: hackathon-task-sg5x.vercel.app
+- Backend: hackathon-task-nu.vercel.app/api/health
 
 ## Tech stack
 - **Backend:** Node.js 18+, Express, MongoDB/Mongoose, JWT, bcryptjs
